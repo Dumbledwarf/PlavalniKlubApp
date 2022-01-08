@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.android.volley.AuthFailureError;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -25,6 +27,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,7 +46,16 @@ public class MainActivity extends AppCompatActivity {
 
     public  void prikaziPlavalce(View view){
         if (view != null){
-            JsonArrayRequest request = new JsonArrayRequest(url, jsonArrayListener, errorListener);
+            JsonArrayRequest request = new JsonArrayRequest(url, jsonArrayListener, errorListener)
+            {
+                @Override
+                public Map<String,String> getHeaders() throws AuthFailureError
+                {
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("ApiKey", "Password123");
+                    return params;
+                }
+            };
             requestQueue.add(request);
         }
     }
@@ -84,15 +97,18 @@ public class MainActivity extends AppCompatActivity {
                 String currentText = plavalci.getText().toString();
                 plavalci.setText(currentText + "\n\n" + row);
             }
-
         }
-
     };
 
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.d("REST error", error.getMessage());
+            if(error instanceof AuthFailureError){
+                plavalci.setText("Nepravilno API geslo");
+            }else{
+                Log.d("REST error", error.toString());
+            }
+
         }
     };
 

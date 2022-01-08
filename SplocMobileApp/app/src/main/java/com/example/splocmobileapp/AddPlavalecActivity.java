@@ -32,6 +32,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AddPlavalecActivity extends AppCompatActivity {
 
@@ -98,7 +100,12 @@ public class AddPlavalecActivity extends AppCompatActivity {
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.d("REST error", error.getMessage());
+            if(error instanceof AuthFailureError){
+                mozneSkupine.setText("Nepravilno API geslo");
+            }else{
+                mozneSkupine.setText("Napaka pri vnosu podatkov, prosimo preverite podatke in ponovno poizkusite");
+                Log.d("REST error", error.toString());
+            }
         }
     };
 
@@ -123,8 +130,13 @@ public class AddPlavalecActivity extends AppCompatActivity {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    status.setText("Napaka pri vnosu podatkov, prosimo preverite podatke in ponovno poizkusite");
-                    Log.e("LOG_VOLLEY", error.toString());
+                    if(error instanceof AuthFailureError){
+                        status.setText("Nepravilno API geslo");
+                    }else{
+                        status.setText("Napaka pri vnosu podatkov, prosimo preverite podatke in ponovno poizkusite");
+                        Log.d("REST error", error.toString());
+                    }
+
                 }
             }
             ) {
@@ -149,6 +161,14 @@ public class AddPlavalecActivity extends AppCompatActivity {
                         status.setText(responseString);
                     }
                     return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
+                }
+                @Override
+                public Map<String,String> getHeaders() throws AuthFailureError
+                {
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("ApiKey", "Password123");
+                    params.put("Content-Type", "application/json");
+                    return params;
                 }
 
             };
