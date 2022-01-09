@@ -56,7 +56,16 @@ public class AddPlavalecActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         String requestURL = "https://sploc-webapp.azurewebsites.net/api/SkupineApi";
-        JsonArrayRequest request = new JsonArrayRequest(requestURL, jsonArrayListener, errorListener);
+        JsonArrayRequest request = new JsonArrayRequest(requestURL, jsonArrayListener, errorListener)
+        {
+            @Override
+            public Map<String,String> getHeaders() throws AuthFailureError
+            {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("ApiKey", "Password123");
+                return params;
+            }
+        };;
         queue.add(request);
 
 
@@ -158,7 +167,12 @@ public class AddPlavalecActivity extends AppCompatActivity {
                     String responseString = "";
                     if (response != null) {
                         responseString = String.valueOf(response.statusCode);
-                        status.setText(responseString);
+                        if (responseString.equals("201")){
+                            status.setText("Uspešen vnos plavalca");
+                        }
+                        else{
+                            status.setText(responseString);
+                        }
                     }
                     return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
                 }
